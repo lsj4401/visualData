@@ -1,17 +1,19 @@
+import sbt.Resolver
+
 name := "visualData"
  
 version := "1.0" 
       
-lazy val `visualdata` = (project in file(".")).enablePlugins(PlayScala)
+//lazy val `visualdata` = (project in file(".")).enablePlugins(PlayScala)
+lazy val root = (project in file(".")).enablePlugins(PlayJava).settings(
+  watchSources ++= (baseDirectory.value / "public/ui" ** "*").get
+)
 
-resolvers += "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases"
-      
-resolvers += "Akka Snapshot Repository" at "http://repo.akka.io/snapshots/"
-      
+
+resolvers += Resolver.sonatypeRepo("snapshots")
+
 scalaVersion := "2.12.2"
 
-libraryDependencies ++= Seq( jdbc , ehcache , ws , specs2 % Test , guice )
-
-unmanagedResourceDirectories in Test <+=  baseDirectory ( _ /"target/web/public/test" )  
-
-      
+libraryDependencies += guice
+libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.2" % Test
+libraryDependencies += "com.h2database" % "h2" % "1.4.196"
