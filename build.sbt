@@ -1,19 +1,35 @@
-import sbt.Resolver
+import play.PlayImport.PlayKeys.playRunHooks
 
-name := "visualData"
- 
-version := "1.0" 
-      
-//lazy val `visualdata` = (project in file(".")).enablePlugins(PlayScala)
-lazy val root = (project in file(".")).enablePlugins(PlayJava).settings(
-  watchSources ++= (baseDirectory.value / "public/ui" ** "*").get
+name := """play-react-webpack"""
+
+version := "1.0-SNAPSHOT"
+
+lazy val root = (project in file(".")).enablePlugins(PlayScala)
+
+scalaVersion := "2.11.6"
+
+libraryDependencies ++= Seq(
+  jdbc,
+  cache,
+  ws,
+  specs2 % Test,
+  "com.codeborne" % "phantomjsdriver" % "1.2.1"
 )
 
+playRunHooks <+= baseDirectory.map(Webpack.apply)
 
-resolvers += Resolver.sonatypeRepo("snapshots")
+routesGenerator := InjectedRoutesGenerator
 
-scalaVersion := "2.12.2"
+excludeFilter in (Assets, JshintKeys.jshint) := "*.js"
 
-libraryDependencies += guice
-libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.2" % Test
-libraryDependencies += "com.h2database" % "h2" % "1.4.196"
+watchSources ~= { (ws: Seq[File]) =>
+  ws filterNot { path =>
+    path.getName.endsWith(".js") || path.getName == ("build")
+  }
+}
+
+pipelineStages := Seq(digest, gzip)
+
+resolvers += "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases"
+
+
