@@ -1,35 +1,15 @@
-import play.PlayImport.PlayKeys.playRunHooks
-
-name := """play-react-webpack"""
+name := """scala-play-react-seed"""
 
 version := "1.0-SNAPSHOT"
 
-lazy val root = (project in file(".")).enablePlugins(PlayScala)
-
-scalaVersion := "2.11.6"
-
-libraryDependencies ++= Seq(
-  jdbc,
-  cache,
-  ws,
-  specs2 % Test,
-  "com.codeborne" % "phantomjsdriver" % "1.2.1"
+lazy val root = (project in file(".")).enablePlugins(PlayJava).settings(
+  watchSources ++= (baseDirectory.value / "public/ui" ** "*").get
 )
 
-playRunHooks <+= baseDirectory.map(Webpack.apply)
+resolvers += Resolver.sonatypeRepo("snapshots")
 
-routesGenerator := InjectedRoutesGenerator
+scalaVersion := "2.12.2"
 
-excludeFilter in (Assets, JshintKeys.jshint) := "*.js"
-
-watchSources ~= { (ws: Seq[File]) =>
-  ws filterNot { path =>
-    path.getName.endsWith(".js") || path.getName == ("build")
-  }
-}
-
-pipelineStages := Seq(digest, gzip)
-
-resolvers += "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases"
-
-
+libraryDependencies += guice
+libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.2" % Test
+libraryDependencies += "com.h2database" % "h2" % "1.4.196"
